@@ -12,6 +12,13 @@
 <h1> Add a New Show </h1>
 
 <a href='/shows'>Go Back</a>
+  {% if messages %}
+  <ul class="messages">
+    {% for message in messages %}
+      <li class="{{ message.tags }}">{{ message }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
 
 <form method="POST" action="/shows/create_show">
   {% csrf_token %}

@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.contrib import messages
 from .models import Show
 
 def index(request):
@@ -12,19 +13,26 @@ def display_add_show(request):
 
 def create_show(request):
     if request.method == "POST":
-        title = request.POST['title']
-        network = request.POST['network']
-        release_date = request.POST['release_date']
-        description = request.POST['description']
+        errors = Show.objects.basic_validation(request.POST)
+        print (len(errors))
+        if len(errors) > 0:
+            for k, v in errors.items():
+                messages.error(request, v)
+            return redirect('/shows/new')
+        else:
+            title = request.POST['title']
+            network = request.POST['network']
+            release_date = request.POST['release_date']
+            description = request.POST['description']
 
-        print(description, title, network)
+            print(description, title, network)
 
-        new_show = Show.objects.create(title = title, network = network, release_date = release_date, description =  description)
+            new_show = Show.objects.create(title = title, network = network, release_date = release_date, description =  description)
 
-        print(new_show)
-        
-        return redirect('/shows')
-        
+            print(new_show)
+            
+            return redirect('/shows')
+            
 def view_edit_show(request, number):
     show_to_edit = Show.objects.get(id=number)
     context = {
@@ -34,14 +42,21 @@ def view_edit_show(request, number):
 
 def edit_show(request, number):
     if request.method == "POST":
-      show_to_edit = Show.objects.get(id=number)
-      show_to_edit.title = request.POST['title']
-      show_to_edit.network = request.POST['network']
-      show_to_edit.release_date = request.POST['release_date']
-      show_to_edit.description = request.POST['description']
-      show_to_edit.save()
+        errors = Show.objects.basic_validation(request.POST)
+        print (len(errors))
+        if len(errors) > 0:
+            for k, v in errors.items():
+                messages.error(request, v)
+            return redirect(f'/shows/{number}/edit')
+        else:
+            show_to_edit = Show.objects.get(id=number)
+            show_to_edit.title = request.POST['title']
+            show_to_edit.network = request.POST['network']
+            show_to_edit.release_date = request.POST['release_date']
+            show_to_edit.description = request.POST['description']
+            show_to_edit.save()
 
-      return redirect(f'/shows/{number}')
+            return redirect(f'/shows/{number}')
 
 def display_show(request, number):
     show_to_display = Show.objects.get(id=number)
